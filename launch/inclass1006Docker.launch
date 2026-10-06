@@ -1,0 +1,72 @@
+<launch>
+
+  <!-- In this launchfile, we demonstrate how to set some initial variables as parameters,
+  	how to record the output file to a place that is persistent, and how to 
+	use a namespace for the node in which we are running. -->
+
+  <!-- change the output directory and prefix if this is not where yours is mapped -->
+  <arg name="bagfileout" default="/ros/catkin_ws/inclass1006"/>
+
+  <!-- sets the initial position of the lead car. -->
+  <param name="/leadcar/x0" type="double" value="20.0" />
+
+  <!-- sets the initial velocity of the ego car. -->
+  <param name="/egocar/v0" type="double" value="1.0" />
+  <!-- sets the initial position of the ego car. -->
+  <param name="/egocar/x0" type="double" value="0.0" />
+  
+  <!-- set parameters for alpha, tau, lambda, and gmin -->
+  <!-- sets the initial position of the ego car. -->
+  <param name="/egocar/alpha" type="double" value="1.1" />
+  <!-- sets the initial position of the ego car. -->
+  <param name="/egocar/tau" type="double" value="2.0" />
+  <!-- sets the initial position of the ego car. -->
+  <param name="/egocar/gmin" type="double" value="3.0" />
+  <!-- sets the initial position of the ego car. -->
+  <param name="/egocar/lambda" type="double" value="0.1" />
+
+  <!-- change the start time if needed -->
+  <node pkg="rosbag" type="play" name="rosbag_player" args="/ros/catkin_ws/2025_10_29_20_50_04_2T3MWRFVXLW056972profacc_test.bag --topics /car/state/vel_x -s 318">
+    <!-- remap the output to go into the desired car -->
+	<remap from="/car/state/vel_x" to="/leadcar/car/state/vel_x" />
+  </node>
+  
+  
+  <!-- By putting this car into a namespace, we keep the variables clean -->
+  <group ns="leadcar">
+	<node pkg="odometer" type="odometer" name="odometer_leadcar">
+	    <remap from="vel_x" to="car/state/vel_x" />
+	    <remap from="odom" to="odom_x"/>
+	</node>
+  </group>
+
+  <!-- By putting this car into a namespace, we keep the variables clean -->
+  <group ns="egocar">
+  	<arg name="leader" default="leadcar"/>
+	<arg name="myname" default="egocar"/>
+	  <node pkg="carcomplexsimulink" type="carcomplexsimulink" name="carcomplexsimulink_node">
+	      <remap from="vel_x" to="car/state/vel_x" />
+	  </node>
+	  <node pkg="inclass1006" type="inclass1006" name="inclass1006_node" />
+	  
+	  <!-- add in the forward-facing radar here -->
+	  <node pkg="subtractor" type="subtractor" name="subtractor_relvel">
+		<remap from="in1" to="/$(arg leader)/car/state/vel_x" />
+		<remap from="in2" to="/$(arg myname)/car/state/vel_x" />
+		<remap from="diff" to="/$(arg myname)/rel_vel" />
+	  </node>
+
+	  <node pkg="subtractor" type="subtractor" name="subtractor_odom">
+		<remap from="in1" to="/$(arg leader)/odom_x" />
+		<remap from="in2" to="/$(arg myname)/odom_x" />
+		<remap from="diff" to="/$(arg myname)/lead_dist" />
+	  </node>
+  </group>
+
+
+
+  
+  <!-- change the output directory if this is not where yours is mapped -->
+  <node pkg="rosbag" type="record" name="rosbag_recorder" args="-a -o $(arg bagfileout)" />
+  
+</launch>
