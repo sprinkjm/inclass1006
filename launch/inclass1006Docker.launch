@@ -16,13 +16,13 @@
   <param name="/egocar/x0" type="double" value="0.0" />
   
   <!-- set parameters for alpha, tau, lambda, and gmin -->
-  <!-- sets the initial position of the ego car. -->
+  <!-- sets the alpha parameter of the ego car's controller. -->
   <param name="/egocar/alpha" type="double" value="1.1" />
-  <!-- sets the initial position of the ego car. -->
+  <!-- sets the tau parameter of the ego car's controller. -->
   <param name="/egocar/tau" type="double" value="2.0" />
-  <!-- sets the initial position of the ego car. -->
+  <!-- sets the gmin parameter of the ego car's controller. -->
   <param name="/egocar/gmin" type="double" value="3.0" />
-  <!-- sets the initial position of the ego car. -->
+  <!-- sets the lambda parameter of the ego car's controller. -->
   <param name="/egocar/lambda" type="double" value="0.1" />
 
   <!-- change the start time if needed -->
